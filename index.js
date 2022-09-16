@@ -44,8 +44,14 @@ class Player {
     this.x = x;
     this.y = y;
     this.img = img;
-    this.isMoving = false;
     this.speed = speed;
+    this.isMoving = false;
+    this.isMovingRight = false;
+    this.isMovingLeft = false;
+    this.isMovingUp = false;
+    this.isMovingDown = false;
+    this.tileCoord;
+    this.tilePixelIndex;
   }
 
   draw() {
@@ -53,11 +59,50 @@ class Player {
   } 
 
   update() {
-    if (this.isMoving) {
-      this.x += vxl;
-      this.x += vxr;
-      this.y += vy;
+    this.tileCoord = getTileCoord(this.x, this.y);
+    this.tilePixelIndex = getPixelIndex(this.tileCoord);
+    if (!this.isMovingDown && !this.isMovingLeft && !this.isMovingRight && !this.isMovingUp) {
+      this.isMoving = false;
     }
+    if (this.isMoving && !this.isColliding()) {
+      this.x += vxr;
+      this.x += vxl;
+      this.y += vy;
+      console.log(`${this.tileCoord.x} ${this.tileCoord.y} and pixelIndex is ${this.tilePixelIndex}`);
+    }
+  }
+
+  isColliding() {
+    let isColliding;
+    if(this.isMovingRight) {
+      let ftcX = getTileCoord((this.x + 30) + vxr, this.y);
+      let ftcXi = getPixelIndex(ftcX);
+      if (isBlack(level.levelPixels[ftcXi])){
+        isColliding = true;
+      }
+    }
+    if(this.isMovingLeft) {
+      let ftcX = getTileCoord((this.x) + vxl, this.y);
+      let ftcXi = getPixelIndex(ftcX);
+      if (isBlack(level.levelPixels[ftcXi])){
+        isColliding = true;
+      }
+    }
+    if(this.isMovingUp) {
+      let ftcY = getTileCoord(this.x, this.y + vy);
+      let ftcYi = getPixelIndex(ftcY);
+      if (isBlack(level.levelPixels[ftcYi])){
+        isColliding = true;
+      }
+    }
+    if(this.isMovingDown) {
+      let ftcY = getTileCoord(this.x, this.y + 30 + vy);
+      let ftcYi = getPixelIndex(ftcY);
+      if (isBlack(level.levelPixels[ftcYi])){
+        isColliding = true;
+      }
+    }
+    return isColliding;
   }
 }
 //--------
@@ -97,11 +142,13 @@ class Level {
     }
   } 
 }
+//Math pixel x,y to tile x,y -> x / 40 + (( y / 40 ) * 19)
+//Math coordinate to levelPixel x + (y * 20)
 //----------------------------------------------------------------------------------------
 //-------------------------------- INITIALIZATION ----------------------------------------
 function init() {
   level = new Level(currentLevelPixels, tileWidth, tileHeight);
-  player = new Player(100, 100, 3, playerImg);
+  player = new Player(720, 120, 3, playerImg); //x:18 y:3 levelPixel: 78  
 }
 //----------------------------------------------------------------------------------------
 //-----------------------------------MAIN-------------------------------------------------
@@ -113,7 +160,7 @@ function animate () {
 
   if (elapsed > fpsInterval) { //Only executes in interval time
     then = now - (elapsed % fpsInterval);
-    c.fillStyle = 'rgba(0,0,0,0)';
+    c.fillStyle = COLOR_BLACK;
     c.clearRect(0,0, canvas.width, canvas.height);
 
     update();
@@ -153,6 +200,17 @@ function isCyan (pixel) {
 function isYellow (pixel) {
   return pixel.r === 255 && pixel.g === 255 && pixel.b === 0 ? true : null;
 }
+
+function getTileCoord(x, y) {
+  let tileX = Math.floor(x / TILESIZE);
+  let tileY = Math.floor(y / TILESIZE);
+  return {x: tileX, y: tileY};
+}
+
+function getPixelIndex(coords) {
+  return coords.x + (coords.y * 20);
+}
+
 function loadAll() {
   loadLevel(currentLevel);
   loadPlayer();
@@ -187,18 +245,21 @@ window.addEventListener("keydown", (event) => {
 
   if (event.key == 'a') {
     player.isMoving = true;
+    player.isMovingLeft = true;
     vxl = -player.speed;
   } else if (event.key == 'w'){
     player.isMoving = true;
+    player.isMovingUp = true;
     vy = -player.speed;
   } else if (event.key == 'd') {
     player.isMoving = true;
+    player.isMovingRight = true;
     vxr = player.speed;
   } else if (event.key == 's') {
     player.isMoving = true;
+    player.isMovingDown = true;
     vy = player.speed;
   } 
-
   }
 )
 
@@ -206,11 +267,15 @@ window.addEventListener("keyup", (event) => {
 
   if (event.key == 'a') {
     vxl = 0;
+    player.isMovingLeft = false;
   } else if (event.key == 'w'){
     vy = 0;
+    player.isMovingUp = false;
   } else if (event.key == 'd') {
+    player.isMovingRight = false;
     vxr = 0;
   } else if (event.key == 's') {
+    player.isMovingDown = false;
     vy = 0;
   } 
 
