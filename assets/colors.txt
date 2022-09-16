@@ -1,0 +1,6 @@
+BLACK 0,0,0 - Wall
+WHITE 255,255,255 - Playable map
+GRAY 192,192,192 - Playable map
+GREEN 0,255,0 - Spawn
+CYAN 0,255,255 - Goal
+YELLOW 255,255,0 - Checkpoint
