@@ -1,3 +1,4 @@
+import levels from './levels/levels.js';
 //-------------------------------DOM Things--------------------------------------
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
@@ -29,6 +30,9 @@ let playerImg;
 let vxr = 0;
 let vxl = 0;
 let vy = 0;
+//Enemy related vars
+let enemies = [];
+let enemyBlueImg;
 //CONSTs
 const COLOR_BLACK = 'rgba(0,0,0,1)';
 const COLOR_WHITE = 'rgba(255,255,255,1)';
@@ -126,12 +130,49 @@ class Player {
   }
 }
 //--------
+class Enemy {
+  constructor(x, y, speed, img) {
+    this.x = x + 8;
+    this.y = y + 8;
+    this.speed = speed;
+    this.img = img;
+  }
+
+  move(){
+    let xd = levels[0].enemyPath[0].x * 40;
+    let yd = levels[0].enemyPath[0].y * 40;
+
+    if (this.x < xd) {
+      this.x += this.speed;
+    }
+    if (this.y < yd) {
+      this.y += this.speed;
+    }
+
+  }
+
+  update(){
+    this.move();
+  }
+
+  draw(){
+    c.drawImage(this.img, this.x, this.y);
+  }
+}
+//--------
 class Level {
   constructor(levelPixels, tileWidth, tileHeight){
     this.levelPixels = levelPixels;
     this.tileSize = TILESIZE;
     this.tileWidth = tileWidth;
     this.tileHeight = tileHeight;
+    this.loadEntities();
+  }
+
+  loadEntities(){
+    for (let i = 0; i < levels[0].enemies; i++) {
+      enemies.push(new Enemy(levels[0].enemySpawn[0].x * 40, levels[0].enemySpawn[0].y * 40, 5, enemyBlueImg));
+    }
   }
 
   draw(){
@@ -139,7 +180,6 @@ class Level {
     let xOffset = 0;
     let color;
     let x = 0;
-    console.log(this.levelPixels);
     for (let i = 0; i < this.levelPixels.length; i++) {
       if(isBlack(this.levelPixels[i])) color = COLOR_BLACK;
       else if(isWhite(this.levelPixels[i])) color = COLOR_WHITE;
@@ -190,11 +230,18 @@ function animate () {
 
 function update () {
   player.update();
+  enemies.forEach((enemy => {
+    enemy.update();
+  }))
 }
 
 function draw() {
   level.draw();
   player.draw();
+  
+  enemies.forEach((enemy => {
+    enemy.draw();
+  }))
 }
 //-------------------------------------------------------------------------------------
 // -----------------------------------Utils--------------------------------------------
@@ -234,10 +281,11 @@ function getPixelIndex(coords) {
 function loadAll() {
   loadLevel(currentLevel);
   loadPlayer();
+  loadEnemies();
 }
 //loaders
 function loadLevel(level) {
-  Jimp.read('./assets/level1.png').then(image => {
+  Jimp.read('./assets/levels/level1.png').then(image => {
     tileWidth = image.bitmap.width;
     tileHeight = image.bitmap.height;
     for (let i = 0; i < image.bitmap.height; i++) {
@@ -249,7 +297,11 @@ function loadLevel(level) {
 }
 function loadPlayer() {
   playerImg = new Image();
-  playerImg.src = './assets/player.png';
+  playerImg.src = './assets/player/player.png';
+}
+function loadEnemies(){
+  enemyBlueImg = new Image();
+  enemyBlueImg.src = './assets/enemies/enemyblue.png'
 }
 
 //------------------------------Event Listeners----------------------------------
