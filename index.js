@@ -2,7 +2,7 @@
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 canvas.width = 1200;
-canvas.height = 1200;
+canvas.height = 900;
 const scoreEl = document.querySelector('#scoreEl');
 const startGameBtn = document.querySelector('#startGameBtn');
 const modalEl = document.querySelector('#modalEl');
@@ -37,6 +37,7 @@ const COLOR_GREEN = 'rgba(0,255,0,1)';
 const COLOR_CYAN = 'rgba(0,255,255,1)';
 const COLOR_YELLOW = 'rgba(255,255,0,1)';
 const TILESIZE = 40;
+    //console.log(`${this.tileCoord.x} ${this.tileCoord.y} and pixelIndex is ${this.tilePixelIndex}`);
 //-------------------------------------------------------------------------------
 //--------------------------------CLASSES----------------------------------------
 class Player {
@@ -64,7 +65,6 @@ class Player {
   update() {
     this.tileCoord = getTileCoord(this.x, this.y);
     this.tilePixelIndex = getPixelIndex(this.tileCoord);
-    console.log(`${this.tileCoord.x} ${this.tileCoord.y} and pixelIndex is ${this.tilePixelIndex}`);
     if (!this.isMovingDown && !this.isMovingLeft && !this.isMovingRight && !this.isMovingUp) {
       this.isMoving = false;
     }
@@ -139,8 +139,8 @@ class Level {
     let xOffset = 0;
     let color;
     let x = 0;
-    
-    for (let i = 0; i < this.tileWidth * this.tileHeight; i++) {
+    console.log(this.levelPixels);
+    for (let i = 0; i < this.levelPixels.length; i++) {
       if(isBlack(this.levelPixels[i])) color = COLOR_BLACK;
       else if(isWhite(this.levelPixels[i])) color = COLOR_WHITE;
       else if(isGray(this.levelPixels[i])) color = COLOR_GRAY;
@@ -148,16 +148,16 @@ class Level {
       else if(isCyan(this.levelPixels[i])) color = COLOR_CYAN;
       else if(isYellow(this.levelPixels[i])) color = COLOR_YELLOW;
       if (x < this.tileWidth) {
-        createRect(xOffset, yOffset, TILESIZE, TILESIZE, color);
-        xOffset += TILESIZE;
+        createRect(xOffset, yOffset, this.tileSize, this.tileSize, color);
+        xOffset += this.tileSize;
         x++;
       }
       else{
         xOffset = 0;
         x = 1;
-        yOffset += TILESIZE;
-        createRect(xOffset, yOffset, TILESIZE, TILESIZE, color);
-        xOffset += TILESIZE;
+        yOffset += this.tileSize;
+        createRect(xOffset, yOffset, this.tileSize, this.tileSize, color);
+        xOffset += this.tileSize;
       } 
     }
   } 
@@ -228,7 +228,7 @@ function getTileCoord(x, y) {
 }
 
 function getPixelIndex(coords) {
-  return coords.x + (coords.y * 20);
+  return coords.x + (coords.y * level.tileWidth);
 }
 
 function loadAll() {
@@ -240,8 +240,8 @@ function loadLevel(level) {
   Jimp.read('./assets/level1.png').then(image => {
     tileWidth = image.bitmap.width;
     tileHeight = image.bitmap.height;
-    for (let i = 0; i < image.bitmap.width; i++) {
-      for (let j = 0; j < image.bitmap.height; j++){
+    for (let i = 0; i < image.bitmap.height; i++) {
+      for (let j = 0; j < image.bitmap.width; j++){
         currentLevelPixels.push(Jimp.intToRGBA(image.getPixelColor(j,i)));
       }
     }
