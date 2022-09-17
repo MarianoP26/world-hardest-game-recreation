@@ -25,6 +25,7 @@ let tileWidth;
 let tileHeight;
 let currentLevel = 0;
 let currentLevelPixels = [];
+let difficulty = 1;
 //Player related vars
 let player;
 let playerImg;
@@ -34,6 +35,17 @@ let vy = 0;
 //Enemy related vars
 let enemies = [];
 let enemyBlueImg;
+//Sound related vars
+let awesomeSound;
+let beginSound;
+let dieSound;
+let excellentSound;
+let wonderfulSound;
+//Music related vars
+let easyMusic;
+let mediumMusic;
+let hardMusic;
+let hellmodeMusic;
 //global CONSTs
 const COLOR_BLACK = 'rgba(0,0,0,1)';
 const COLOR_WHITE = 'rgba(255,255,255,1)';
@@ -132,6 +144,7 @@ class Player {
 
   die() {
     this.deaths++;
+    dieSound.play();
     this.respawn();
   }
 
@@ -240,7 +253,7 @@ class Level {
 
   loadEntities(){
     for (let i = 0; i < levels[currentLevel].enemies; i++) {
-      enemies.push(new Enemy(levels[currentLevel].enemySpawn[i].x * TILESIZE, levels[currentLevel].enemySpawn[i].y * TILESIZE, 5, enemyBlueImg, i));
+      enemies.push(new Enemy(levels[currentLevel].enemySpawn[i].x * TILESIZE, levels[currentLevel].enemySpawn[i].y * TILESIZE, levels[currentLevel].enemySpeed * difficulty , enemyBlueImg, i));
     }
   }
 
@@ -348,10 +361,16 @@ function getPixelIndex(coords) {
   return coords.x + (coords.y * level.tileWidth);
 }
 
+function playMusic() {
+  difficulty == 1 ? easyMusic.play() : difficulty == 2? mediumMusic.play() : difficulty == 3 ? hardMusic.play() : hellmodeMusic.play(); 
+}
+
 function loadAll() {
   loadLevel(currentLevel);
   loadPlayer();
   loadEnemies();
+  loadSounds();
+  loadMusic();
 }
 //loaders
 function loadLevel(level) {
@@ -373,7 +392,28 @@ function loadEnemies(){
   enemyBlueImg = new Image();
   enemyBlueImg.src = './assets/enemies/enemyblue.png'
 }
-
+function loadSounds() {
+  awesomeSound = new Audio();
+  awesomeSound.src = './assets/sounds/awesome.wav';
+  beginSound = new Audio();
+  beginSound.src = './assets/sounds/begin.wav';
+  dieSound = new Audio();
+  dieSound.src = './assets/sounds/die.wav';
+  excellentSound = new Audio();
+  excellentSound.src = './assets/sounds/excellent.wav';
+  wonderfulSound = new Audio();
+  wonderfulSound.src = './assets/sounds/wonderful.wav';
+}
+function loadMusic() {
+  easyMusic = new Audio();
+  easyMusic.src = './assets/music/easy.dat';
+  mediumMusic = new Audio();
+  mediumMusic.src = './assets/music/medium.dat';
+  hardMusic = new Audio();
+  hardMusic.src = './assets/music/hard.dat';
+  hellmodeMusic = new Audio();
+  hellmodeMusic.src = './assets/music/hellmode.dat';
+}
 //------------------------------Event Listeners----------------------------------
 startGameBtn.addEventListener('click', () =>{
   then = Date.now();
@@ -383,6 +423,8 @@ startGameBtn.addEventListener('click', () =>{
   modalEl.style.display = 'none';
   statsEl.style.visibility = 'visible';
   document.querySelector('body').style.background = '#00bbff';
+  beginSound.play();
+  playMusic();
 
 })
 window.addEventListener("keydown", (event) => {
