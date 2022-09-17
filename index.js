@@ -40,7 +40,7 @@ const TILESIZE = 40;
 //-------------------------------------------------------------------------------
 //--------------------------------CLASSES----------------------------------------
 class Player {
-  constructor(x, y, speed, img) {
+  constructor(x, y, speed, size, img) {
     this.x = x;
     this.y = y;
     this.img = img;
@@ -52,6 +52,9 @@ class Player {
     this.isMovingDown = false;
     this.tileCoord;
     this.tilePixelIndex;
+    this.isCollidingX = false;
+    this.isCollidingY = false;
+    this.size = size;
   }
 
   draw() {
@@ -61,48 +64,65 @@ class Player {
   update() {
     this.tileCoord = getTileCoord(this.x, this.y);
     this.tilePixelIndex = getPixelIndex(this.tileCoord);
+    console.log(`${this.tileCoord.x} ${this.tileCoord.y} and pixelIndex is ${this.tilePixelIndex}`);
     if (!this.isMovingDown && !this.isMovingLeft && !this.isMovingRight && !this.isMovingUp) {
       this.isMoving = false;
     }
-    if (this.isMoving && !this.isColliding()) {
+
+
+    this.isColliding();
+    if (this.isMoving && !this.isCollidingX) {
       this.x += vxr;
-      this.x += vxl;
-      this.y += vy;
-      console.log(`${this.tileCoord.x} ${this.tileCoord.y} and pixelIndex is ${this.tilePixelIndex}`);
+      this.x += vxl
     }
+    if (this.isMoving && !this.isCollidingY){
+      this.y += vy;
+    }
+    this.isCollidingX = false;
+    this.isCollidingY = false; 
   }
 
   isColliding() {
-    let isColliding;
     if(this.isMovingRight) {
-      let ftcX = getTileCoord((this.x + 30) + vxr, this.y);
+      let ftcX = getTileCoord((this.x - 2 + this.size) + vxr, this.y);
       let ftcXi = getPixelIndex(ftcX);
-      if (isBlack(level.levelPixels[ftcXi])){
-        isColliding = true;
+
+      let ftcX2 = getTileCoord((this.x - 2 + this.size) + vxr, this.y + this.size - 2);
+      let ftcXi2 = getPixelIndex(ftcX2);
+      if (isBlack(level.levelPixels[ftcXi]) || isBlack(level.levelPixels[ftcXi2])){
+        this.isCollidingX = true;
       }
     }
     if(this.isMovingLeft) {
       let ftcX = getTileCoord((this.x) + vxl, this.y);
       let ftcXi = getPixelIndex(ftcX);
-      if (isBlack(level.levelPixels[ftcXi])){
-        isColliding = true;
+
+      let ftcX2 = getTileCoord((this.x) + vxl, this.y + this.size - 2);
+      let ftcXi2 = getPixelIndex(ftcX2);
+      if (isBlack(level.levelPixels[ftcXi]) || isBlack(level.levelPixels[ftcXi2])){
+        this.isCollidingX = true;
       }
     }
     if(this.isMovingUp) {
       let ftcY = getTileCoord(this.x, this.y + vy);
       let ftcYi = getPixelIndex(ftcY);
-      if (isBlack(level.levelPixels[ftcYi])){
-        isColliding = true;
+
+      let ftcY2 = getTileCoord(this.x + this.size - 2, this.y + vy);
+      let ftcYi2 = getPixelIndex(ftcY2);
+      if (isBlack(level.levelPixels[ftcYi]) || isBlack(level.levelPixels[ftcYi2])){
+        this.isCollidingY = true;
       }
     }
     if(this.isMovingDown) {
-      let ftcY = getTileCoord(this.x, this.y + 30 + vy);
+      let ftcY = getTileCoord(this.x, this.y + this.size - 2 + vy);
       let ftcYi = getPixelIndex(ftcY);
-      if (isBlack(level.levelPixels[ftcYi])){
-        isColliding = true;
+
+      let ftcY2 = getTileCoord(this.x + this.size - 2, this.y + this.size - 2 + vy);
+      let ftcYi2 = getPixelIndex(ftcY2);
+      if (isBlack(level.levelPixels[ftcYi]) || isBlack(level.levelPixels[ftcYi2])){
+        this.isCollidingY = true;
       }
     }
-    return isColliding;
   }
 }
 //--------
@@ -148,7 +168,7 @@ class Level {
 //-------------------------------- INITIALIZATION ----------------------------------------
 function init() {
   level = new Level(currentLevelPixels, tileWidth, tileHeight);
-  player = new Player(720, 120, 3, playerImg); //x:18 y:3 levelPixel: 78  
+  player = new Player(720, 120, 2, 30, playerImg); //x:18 y:3 levelPixel: 78  
 }
 //----------------------------------------------------------------------------------------
 //-----------------------------------MAIN-------------------------------------------------
