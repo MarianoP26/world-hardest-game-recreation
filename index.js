@@ -22,7 +22,7 @@ let animationId;
 let level;
 let tileWidth;
 let tileHeight;
-let currentLevel = 1;
+let currentLevel = 0;
 let currentLevelPixels = [];
 //Player related vars
 let player;
@@ -131,24 +131,72 @@ class Player {
 }
 //--------
 class Enemy {
-  constructor(x, y, speed, img) {
+  constructor(x, y, speed, img, id) {
     this.x = x + 8;
     this.y = y + 8;
     this.speed = speed;
     this.img = img;
+    this.originX = this.x;
+    this.originY = this.y;
+    this.id = id;
+    this.currentPath = 0;
+    this.destinyX;
+    this.destinyY;
+    this.getNextDestiny();
   }
 
   move(){
-    let xd = levels[0].enemyPath[0].x * 40;
-    let yd = levels[0].enemyPath[0].y * 40;
-
-    if (this.x < xd) {
-      this.x += this.speed;
+    console.log(enemies.length);
+    if(this.destinyX >= this.x) {
+      if(this.destinyX - this.x <= this.speed) {
+        this.x = this.destinyX;
+      }else {
+        this.x += this.speed;
+      }
+    }else if(this.destinyX <= this.x) {
+      if(this.x - this.destinyX <= this.speed) {
+        this.x = this.destinyX;
+      }else {
+        this.x -= this.speed;
+      }
     }
-    if (this.y < yd) {
-      this.y += this.speed;
+    if(this.destinyY >= this.y) {
+      if(this.destinyY - this.y <= this.speed) {
+        this.y = this.destinyY;
+      }else {
+        this.y += this.speed;
+      }
+    }else if(this.destinyY <= this.y) {
+      if(this.y - this.destinyY <= this.speed) {
+        this.y = this.destinyY;
+      }else {
+        this.y -= this.speed;
+      }
     }
 
+    if (this.destinyX == this.x && this.destinyY == this.y) {
+      this.getNextDestiny();
+    }
+
+  }
+
+  getNextDestiny() {
+    console.log(this.currentPath);
+    if (this.currentPath == 0) { //Origin to first
+      this.destinyX = (levels[currentLevel].enemyPath[this.id][this.currentPath].x * TILESIZE) + 8;
+      this.destinyY = (levels[currentLevel].enemyPath[this.id][this.currentPath].y * TILESIZE) + 8;
+      this.currentPath++;
+    } else {
+      if(!levels[0].enemyPath[this.id][this.currentPath]){ //No more destinations? back to origin
+        this.destinyX = this.originX;
+        this.destinyY = this.destinyY;
+        this.currentPath = 0;
+      } else { //More destinations? go for them
+        this.destinyX = levels[currentLevel].enemyPath[this.id][this.currentPath].x;
+        this.destinyY = levels[currentLevel].enemyPath[this.id][this.currentPath].y;
+        this.currentPath++;
+      }
+    }
   }
 
   update(){
@@ -171,7 +219,7 @@ class Level {
 
   loadEntities(){
     for (let i = 0; i < levels[0].enemies; i++) {
-      enemies.push(new Enemy(levels[0].enemySpawn[0].x * 40, levels[0].enemySpawn[0].y * 40, 5, enemyBlueImg));
+      enemies.push(new Enemy(levels[currentLevel].enemySpawn[i].x * TILESIZE, levels[currentLevel].enemySpawn[i].y * TILESIZE, 5, enemyBlueImg, i));
     }
   }
 
