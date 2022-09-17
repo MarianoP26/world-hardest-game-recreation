@@ -4,9 +4,10 @@ const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
 canvas.width = 1200;
 canvas.height = 900;
-const scoreEl = document.querySelector('#scoreEl');
+const deathsEl = document.querySelector('#deathsEl');
 const startGameBtn = document.querySelector('#startGameBtn');
 const modalEl = document.querySelector('#modalEl');
+const statsEl = document.querySelector('#statsEl');
 const bigScoreEl = document.querySelector('#bigScoreEl');
 //-------------------------------------------------------------------------------
 //-----------------------------Global variables----------------------------------
@@ -33,7 +34,7 @@ let vy = 0;
 //Enemy related vars
 let enemies = [];
 let enemyBlueImg;
-//CONSTs
+//global CONSTs
 const COLOR_BLACK = 'rgba(0,0,0,1)';
 const COLOR_WHITE = 'rgba(255,255,255,1)';
 const COLOR_GRAY = 'rgba(192,192,192,1)';
@@ -41,7 +42,6 @@ const COLOR_GREEN = 'rgba(0,255,0,1)';
 const COLOR_CYAN = 'rgba(0,255,255,1)';
 const COLOR_YELLOW = 'rgba(255,255,0,1)';
 const TILESIZE = 40;
-    //console.log(`${this.tileCoord.x} ${this.tileCoord.y} and pixelIndex is ${this.tilePixelIndex}`);
 //-------------------------------------------------------------------------------
 //--------------------------------CLASSES----------------------------------------
 class Player {
@@ -60,6 +60,7 @@ class Player {
     this.isCollidingX = false;
     this.isCollidingY = false;
     this.size = size;
+    this.deaths = 0;
   }
 
   draw() {
@@ -128,6 +129,16 @@ class Player {
       }
     }
   }
+
+  die() {
+    this.deaths++;
+    this.respawn();
+  }
+
+  respawn(){
+    this.x = levels[currentLevel].playerSpawn.x * TILESIZE;
+    this.y = levels[currentLevel].playerSpawn.y * TILESIZE;
+  }
 }
 //--------
 class Enemy {
@@ -142,11 +153,11 @@ class Enemy {
     this.currentPath = 0;
     this.destinyX;
     this.destinyY;
+    this.size = 24;
     this.getNextDestiny();
   }
 
   move(){
-    console.log(enemies.length);
     if(this.destinyX >= this.x) {
       if(this.destinyX - this.x <= this.speed) {
         this.x = this.destinyX;
@@ -179,9 +190,8 @@ class Enemy {
     }
 
   }
-
+  //The hardcoded "8" is there to actually center the thing in the middle of the tile
   getNextDestiny() {
-    console.log(this.currentPath);
     if (this.currentPath == 0) { //Origin to first
       this.destinyX = (levels[currentLevel].enemyPath[this.id][this.currentPath].x * TILESIZE) + 8;
       this.destinyY = (levels[currentLevel].enemyPath[this.id][this.currentPath].y * TILESIZE) + 8;
@@ -192,15 +202,26 @@ class Enemy {
         this.destinyY = this.destinyY;
         this.currentPath = 0;
       } else { //More destinations? go for them
-        this.destinyX = levels[currentLevel].enemyPath[this.id][this.currentPath].x;
-        this.destinyY = levels[currentLevel].enemyPath[this.id][this.currentPath].y;
+        this.destinyX = (levels[currentLevel].enemyPath[this.id][this.currentPath].x * TILESIZE) + 8;
+        this.destinyY = (levels[currentLevel].enemyPath[this.id][this.currentPath].y * TILESIZE) + 8;
         this.currentPath++;
       }
     }
   }
 
+  isColliding(){
+    if (player.x > this.size + this.x || this.x > player.size + player.x || player.y > this.size + this.y || this.y > player.size + player.y){
+      return false;
+    }else{
+      player.die();
+    }
+
+    
+  }
+
   update(){
     this.move();
+    this.isColliding();
   }
 
   draw(){
@@ -218,7 +239,7 @@ class Level {
   }
 
   loadEntities(){
-    for (let i = 0; i < levels[0].enemies; i++) {
+    for (let i = 0; i < levels[currentLevel].enemies; i++) {
       enemies.push(new Enemy(levels[currentLevel].enemySpawn[i].x * TILESIZE, levels[currentLevel].enemySpawn[i].y * TILESIZE, 5, enemyBlueImg, i));
     }
   }
@@ -250,13 +271,13 @@ class Level {
     }
   } 
 }
-//Math pixel x,y to tile x,y -> x / 40 + (( y / 40 ) * 19)
-//Math coordinate to levelPixel x + (y * 20)
 //----------------------------------------------------------------------------------------
-//-------------------------------- INITIALIZATION ----------------------------------------
+//-------------------------------- LEVEL INITIALIZATION ----------------------------------------
 function init() {
   level = new Level(currentLevelPixels, tileWidth, tileHeight);
-  player = new Player(720, 120, 2, 30, playerImg); //x:18 y:3 levelPixel: 78  
+  let playerSpeed = 2;
+  let playerSize = 30;
+  player = new Player(levels[currentLevel].playerSpawn.x * TILESIZE, levels[currentLevel].playerSpawn.y * TILESIZE, playerSpeed, playerSize, playerImg); 
 }
 //----------------------------------------------------------------------------------------
 //-----------------------------------MAIN-------------------------------------------------
@@ -277,6 +298,7 @@ function animate () {
 }
 
 function update () {
+  deathsEl.innerHTML = player.deaths;
   player.update();
   enemies.forEach((enemy => {
     enemy.update();
@@ -359,10 +381,11 @@ startGameBtn.addEventListener('click', () =>{
   init();
   animate();
   modalEl.style.display = 'none';
+  statsEl.style.visibility = 'visible';
+  document.querySelector('body').style.background = '#00bbff';
+
 })
-
 window.addEventListener("keydown", (event) => {
-
   if (event.key == 'a') {
     player.isMoving = true;
     player.isMovingLeft = true;
@@ -382,9 +405,7 @@ window.addEventListener("keydown", (event) => {
   } 
   }
 )
-
 window.addEventListener("keyup", (event) => {
-
   if (event.key == 'a') {
     vxl = 0;
     player.isMovingLeft = false;
@@ -401,7 +422,5 @@ window.addEventListener("keyup", (event) => {
 
   }
 )
-
-
 //Load al images before player clicks start button
 loadAll();
