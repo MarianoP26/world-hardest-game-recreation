@@ -16,21 +16,21 @@
     <div class = "fixed inset-0 flex items-center justify-center" id="modalEl">
         <div class="bg-white max-w-md w-full p-6 text-center">
             <div class="difficulty">
-                <div class="input- wrapper">
-                    <input type="radio" name="difficulty" id="difficulty-choser" value="1">
+                <div class="input-wrapper">
+                    <input type="radio" name="difficulty" id="difficulty-choser" value="1" checked="checked">
                     <label for="easy">Easy</label>
                 </div>
-                <div class="input- wrapper">
+                <div class="input-wrapper">
                     <input type="radio" name="difficulty" id="difficulty-choser" value="2">
                     <label for="medium">Medium</label>
                 </div>
-                <div class="input- wrapper">
+                <div class="input-wrapper">
                     <input type="radio" name="difficulty" id="difficulty-choser" value="3">
                     <label for="hard">Hard</label>
                 </div>
-                <div class="input- wrapper">
+                <div class="input-wrapper">
                     <input type="radio" name="difficulty" id="difficulty-choser" value="4">
-                    <label for="hell">Hell</label>
+                    <label for="ascended">Ascended</label>
                 </div>
                 
             </div>
@@ -43,6 +43,7 @@
     </div>
     <canvas></canvas>
     <div class="stats" id="statsEl">
+        <div class ="deathsEl text-white text-bg ml-2 mt-1 select-none"><span>Level  </span><span id="levelEl">1</span></div>
         <div class ="deathsEl text-white text-bg ml-2 mt-1 select-none"><span>Deaths: </span><span id="deathsEl">0</span></div>
         <div class ="deathsEl text-white text-bg ml-2 mt-1 select-none"><span>Coins: </span><span id="coinsEl">0</span></div>
     </div>

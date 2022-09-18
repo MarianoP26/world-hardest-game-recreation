@@ -50,14 +50,17 @@ let hellmodeMusic;
 let musicList = [];
 let musicRepeatCounter = 2;
 let currentSong;
-//global CONSTs
+//Global CONSTs
 const COLOR_BLACK = 'rgba(0,0,0,1)';
 const COLOR_WHITE = 'rgba(255,255,255,1)';
 const COLOR_GRAY = 'rgba(192,192,192,1)';
-const COLOR_GREEN = 'rgba(0,255,0,1)';
-const COLOR_CYAN = 'rgba(0,255,255,1)';
+const COLOR_GREEN = '#76ff03';
+let COLOR_CYAN = '#73e8ff';
 const COLOR_YELLOW = 'rgba(255,255,0,1)';
 const TILESIZE = 40;
+//Color related vars
+let colIndex = 255;
+let upwards = true;
 //-------------------------------------------------------------------------------
 //--------------------------------CLASSES----------------------------------------
 class Player {
@@ -306,7 +309,7 @@ function animate () {
   now = Date.now();
   elapsed = now - then;
 
-  if (elapsed > fpsInterval) { //Only executes in interval time
+  if (elapsed > fpsInterval) { //Only executes in interval time 60fps
     then = now - (elapsed % fpsInterval);
     c.fillStyle = COLOR_BLACK;
     c.clearRect(0,0, canvas.width, canvas.height);
@@ -322,6 +325,9 @@ function update () {
   enemies.forEach((enemy => {
     enemy.update();
   }))
+
+  colorEffectUpdate();
+
 }
 
 function draw() {
@@ -357,13 +363,13 @@ function isYellow (pixel) {
   return pixel.r === 255 && pixel.g === 255 && pixel.b === 0 ? true : null;
 }
 
-function getTileCoord(x, y) {
+function getTileCoord(x, y) { //Converts pixel position to tile index
   let tileX = Math.floor(x / TILESIZE);
   let tileY = Math.floor(y / TILESIZE);
   return {x: tileX, y: tileY};
 }
 
-function getPixelIndex(coords) {
+function getPixelIndex(coords) {  // Converts tile index to levelPixel index
   return coords.x + (coords.y * level.tileWidth);
 }
 
@@ -389,10 +395,22 @@ function playMusic() {
       randomizer == 1 ? musicList[difficulty - 1].currentTime = 0 : randomizer == 2 ? musicList[difficulty - 1].currentTime = 14 : randomizer == 3 ? musicList[difficulty - 1].currentTime = 51 : randomizer == 4 ? musicList[difficulty - 1].currentTime = 84 : musicList[difficulty - 1].currentTime = 99;
       musicList[difficulty -1].play();
     }
-    
-    
   }
-  
+}
+
+function colorEffectUpdate() {
+  if (colIndex < 255 && upwards) {
+    COLOR_CYAN = `rgba(0,255,${colIndex},1)`;
+    colIndex++;
+  }else {
+    upwards = false;
+    if (colIndex > 222) {
+      COLOR_CYAN = `rgba(0,255,${colIndex},1)`;
+      colIndex--;
+    }else {
+      upwards = true;
+    }
+  }
 }
 
 function loadAll() {
@@ -463,7 +481,11 @@ startGameBtn.addEventListener('click', () =>{
   if (difficulty == 4) document.querySelector('body').classList.add("hellmode");
   else if (difficulty == 1) document.querySelector('body').classList.add("easy");
   else if (difficulty == 2) document.querySelector('body').classList.add("medium");
-  else if (difficulty == 3) document.querySelector('body').classList.add("hard");
+  else if (difficulty == 3) {
+    document.querySelector('body').classList.add("hard");
+    document.querySelector('canvas').classList.add("hardzoom");
+  }
+  
 
 })
 window.addEventListener("keydown", (event) => {
