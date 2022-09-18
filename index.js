@@ -19,13 +19,14 @@ let startTime;
 let now;
 let elapsed;
 let animationId;
+let isFirstTime = true;
 //Level related vars
 let level;
 let tileWidth;
 let tileHeight;
 let currentLevel = 0;
 let currentLevelPixels = [];
-let difficulty = 1;
+let difficulty = 4  ;
 //Player related vars
 let player;
 let playerImg;
@@ -46,6 +47,9 @@ let easyMusic;
 let mediumMusic;
 let hardMusic;
 let hellmodeMusic;
+let musicList = [];
+let musicRepeatCounter = 2;
+let currentSong;
 //global CONSTs
 const COLOR_BLACK = 'rgba(0,0,0,1)';
 const COLOR_WHITE = 'rgba(255,255,255,1)';
@@ -145,12 +149,14 @@ class Player {
   die() {
     this.deaths++;
     dieSound.play();
+    musicList[difficulty -1].pause();
     this.respawn();
   }
 
   respawn(){
     this.x = levels[currentLevel].playerSpawn.x * TILESIZE;
     this.y = levels[currentLevel].playerSpawn.y * TILESIZE;
+    playMusic();
   }
 }
 //--------
@@ -362,7 +368,31 @@ function getPixelIndex(coords) {
 }
 
 function playMusic() {
-  difficulty == 1 ? easyMusic.play() : difficulty == 2? mediumMusic.play() : difficulty == 3 ? hardMusic.play() : hellmodeMusic.play(); 
+  if (difficulty == 4) {
+    musicList[difficulty - 1].play();
+    return;
+  }
+  if (isFirstTime) {
+    musicList[difficulty - 1].currentTime = 0;
+    currentSong = musicList[difficulty - 1];
+    musicList[difficulty - 1].play();
+    isFirstTime = false;
+    musicRepeatCounter --;
+  } else {
+    if (musicRepeatCounter > 0) {
+      currentSong.play();
+      musicRepeatCounter --;
+    }else {
+      let randomizer = Math.floor(Math.random() * (6 - 1 + 1) + 1);
+      console.log(randomizer);
+      musicRepeatCounter = 2;
+      randomizer == 1 ? musicList[difficulty - 1].currentTime = 0 : randomizer == 2 ? musicList[difficulty - 1].currentTime = 14 : randomizer == 3 ? musicList[difficulty - 1].currentTime = 51 : randomizer == 4 ? musicList[difficulty - 1].currentTime = 84 : musicList[difficulty - 1].currentTime = 99;
+      musicList[difficulty -1].play();
+    }
+    
+    
+  }
+  
 }
 
 function loadAll() {
@@ -413,9 +443,12 @@ function loadMusic() {
   hardMusic.src = './assets/music/hard.dat';
   hellmodeMusic = new Audio();
   hellmodeMusic.src = './assets/music/hellmode.dat';
+  musicList.push(easyMusic, mediumMusic, hardMusic, hellmodeMusic);
 }
 //------------------------------Event Listeners----------------------------------
 startGameBtn.addEventListener('click', () =>{
+  let difficultyRadioEl = document.querySelector('input[name="difficulty"]:checked').value;
+  difficulty = difficultyRadioEl;
   then = Date.now();
   startTime = then;
   init();
@@ -425,6 +458,12 @@ startGameBtn.addEventListener('click', () =>{
   document.querySelector('body').style.background = '#00bbff';
   beginSound.play();
   playMusic();
+
+  if (difficulty == 4) document.querySelector('canvas').classList.add("canvashell");
+  if (difficulty == 4) document.querySelector('body').classList.add("hellmode");
+  else if (difficulty == 1) document.querySelector('body').classList.add("easy");
+  else if (difficulty == 2) document.querySelector('body').classList.add("medium");
+  else if (difficulty == 3) document.querySelector('body').classList.add("hard");
 
 })
 window.addEventListener("keydown", (event) => {

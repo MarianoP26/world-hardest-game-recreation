@@ -1,7 +1,7 @@
 export default [{
   id: 1,
   url: './assets/levels/level1.png',
-  playerSpawn: {x: 1, y: 1},
+  playerSpawn: {x: 8, y: 8},
   enemies: 4,
   enemySpeed: 5,
   enemySpawn: [{x: 4, y: 2,}, {x: 15, y: 4}, {x: 4, y: 5}, {x: 15, y: 7}],
