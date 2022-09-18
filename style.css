@@ -130,7 +130,7 @@ body{
 
 50% {
  background-color: rgb(160, 0, 0);
- filter:hue-rotate(-45deg);
+ filter:blur(10px);
 }
 
 100% {

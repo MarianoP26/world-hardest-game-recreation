@@ -8,6 +8,7 @@ const deathsEl = document.querySelector('#deathsEl');
 const startGameBtn = document.querySelector('#startGameBtn');
 const modalEl = document.querySelector('#modalEl');
 const statsEl = document.querySelector('#statsEl');
+const levelEl = document.querySelector('#levelEl');
 const bigScoreEl = document.querySelector('#bigScoreEl');
 //-------------------------------------------------------------------------------
 //-----------------------------Global variables----------------------------------
@@ -24,7 +25,7 @@ let isFirstTime = true;
 let level;
 let tileWidth;
 let tileHeight;
-let currentLevel = 0;
+let currentLevel = 2;
 let currentLevelPixels = [];
 let difficulty = 4  ;
 //Player related vars
@@ -42,6 +43,7 @@ let beginSound;
 let dieSound;
 let excellentSound;
 let wonderfulSound;
+let checkPointSoundMax = 1;
 //Music related vars
 let easyMusic;
 let mediumMusic;
@@ -80,6 +82,7 @@ class Player {
     this.isCollidingY = false;
     this.size = size;
     this.deaths = 0;
+    this.checkPoint;
   }
 
   draw() {
@@ -116,6 +119,13 @@ class Player {
       if (isBlack(level.levelPixels[ftcXi]) || isBlack(level.levelPixels[ftcXi2])){
         this.isCollidingX = true;
       }
+      else if (isYellow(level.levelPixels[ftcXi]) || isYellow(level.levelPixels[ftcXi2])){
+        this.checkPoint = levels[currentLevel].checkpoints[0];
+        if (checkPointSoundMax > 0) {
+          excellentSound.play();
+          checkPointSoundMax--;
+        }
+      }
     }
     if(this.isMovingLeft) {
       let ftcX = getTileCoord((this.x) + vxl, this.y);
@@ -125,6 +135,13 @@ class Player {
       let ftcXi2 = getPixelIndex(ftcX2);
       if (isBlack(level.levelPixels[ftcXi]) || isBlack(level.levelPixels[ftcXi2])){
         this.isCollidingX = true;
+      }
+      else if (isYellow(level.levelPixels[ftcXi]) || isYellow(level.levelPixels[ftcXi2])){
+        this.checkPoint = levels[currentLevel].checkpoints[0];
+        if (checkPointSoundMax > 0) {
+          excellentSound.play();
+          checkPointSoundMax--;
+        }
       }
     }
     if(this.isMovingUp) {
@@ -136,6 +153,13 @@ class Player {
       if (isBlack(level.levelPixels[ftcYi]) || isBlack(level.levelPixels[ftcYi2])){
         this.isCollidingY = true;
       }
+      else if (isYellow(level.levelPixels[ftcYi]) || isYellow(level.levelPixels[ftcYi2])){
+        this.checkPoint = levels[currentLevel].checkpoints[0];
+        if (checkPointSoundMax > 0) {
+          excellentSound.play();
+          checkPointSoundMax--;
+        }
+      }
     }
     if(this.isMovingDown) {
       let ftcY = getTileCoord(this.x, this.y + this.size - 2 + vy);
@@ -145,6 +169,13 @@ class Player {
       let ftcYi2 = getPixelIndex(ftcY2);
       if (isBlack(level.levelPixels[ftcYi]) || isBlack(level.levelPixels[ftcYi2])){
         this.isCollidingY = true;
+      }
+      else if (isYellow(level.levelPixels[ftcYi]) || isYellow(level.levelPixels[ftcYi2])){
+        this.checkPoint = levels[currentLevel].checkpoints[0];
+        if (checkPointSoundMax > 0) {
+          excellentSound.play();
+          checkPointSoundMax--;
+        }
       }
     }
   }
@@ -157,8 +188,13 @@ class Player {
   }
 
   respawn(){
-    this.x = levels[currentLevel].playerSpawn.x * TILESIZE;
-    this.y = levels[currentLevel].playerSpawn.y * TILESIZE;
+    if(!this.checkPoint){
+      this.x = levels[currentLevel].playerSpawn.x * TILESIZE;
+      this.y = levels[currentLevel].playerSpawn.y * TILESIZE;
+    }else{
+      this.x = this.checkPoint.x * TILESIZE;
+      this.y = this.checkPoint.y * TILESIZE;
+    }
     playMusic();
   }
 }
@@ -219,9 +255,9 @@ class Enemy {
       this.destinyY = (levels[currentLevel].enemyPath[this.id][this.currentPath].y * TILESIZE) + 8;
       this.currentPath++;
     } else {
-      if(!levels[0].enemyPath[this.id][this.currentPath]){ //No more destinations? back to origin
+      if(!levels[currentLevel].enemyPath[this.id][this.currentPath]){ //No more destinations? back to origin
         this.destinyX = this.originX;
-        this.destinyY = this.destinyY;
+        this.destinyY = this.originY;
         this.currentPath = 0;
       } else { //More destinations? go for them
         this.destinyX = (levels[currentLevel].enemyPath[this.id][this.currentPath].x * TILESIZE) + 8;
@@ -262,7 +298,7 @@ class Level {
 
   loadEntities(){
     for (let i = 0; i < levels[currentLevel].enemies; i++) {
-      enemies.push(new Enemy(levels[currentLevel].enemySpawn[i].x * TILESIZE, levels[currentLevel].enemySpawn[i].y * TILESIZE, levels[currentLevel].enemySpeed * difficulty , enemyBlueImg, i));
+      enemies.push(new Enemy(levels[currentLevel].enemySpawn[i].x * TILESIZE, levels[currentLevel].enemySpawn[i].y * TILESIZE, levels[currentLevel].enemySpawn[i].s , enemyBlueImg, i));
     }
   }
 
@@ -300,6 +336,7 @@ function init() {
   let playerSpeed = 2;
   let playerSize = 30;
   player = new Player(levels[currentLevel].playerSpawn.x * TILESIZE, levels[currentLevel].playerSpawn.y * TILESIZE, playerSpeed, playerSize, playerImg); 
+  levelEl.innerHTML = currentLevel + 1;
 }
 //----------------------------------------------------------------------------------------
 //-----------------------------------MAIN-------------------------------------------------
@@ -390,7 +427,6 @@ function playMusic() {
       musicRepeatCounter --;
     }else {
       let randomizer = Math.floor(Math.random() * (6 - 1 + 1) + 1);
-      console.log(randomizer);
       musicRepeatCounter = 2;
       randomizer == 1 ? musicList[difficulty - 1].currentTime = 0 : randomizer == 2 ? musicList[difficulty - 1].currentTime = 14 : randomizer == 3 ? musicList[difficulty - 1].currentTime = 51 : randomizer == 4 ? musicList[difficulty - 1].currentTime = 84 : musicList[difficulty - 1].currentTime = 99;
       musicList[difficulty -1].play();
@@ -422,7 +458,7 @@ function loadAll() {
 }
 //loaders
 function loadLevel(level) {
-  Jimp.read('./assets/levels/level1.png').then(image => {
+  Jimp.read(levels[currentLevel].url).then(image => {
     tileWidth = image.bitmap.width;
     tileHeight = image.bitmap.height;
     for (let i = 0; i < image.bitmap.height; i++) {
