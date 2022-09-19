@@ -25,7 +25,7 @@ let isFirstTime = true;
 let level;
 let tileWidth;
 let tileHeight;
-let currentLevel = 2;
+let currentLevel = 3;
 let currentLevelPixels = [];
 let difficulty = 4  ;
 //Player related vars
@@ -109,6 +109,7 @@ class Player {
     this.isCollidingY = false; 
   }
 
+  //TODO: Refactor the code where detects if next pixel is cyan/green.
   isColliding() {
     if(this.isMovingRight) {
       let ftcX = getTileCoord((this.x - 2 + this.size) + vxr, this.y);
@@ -525,19 +526,19 @@ startGameBtn.addEventListener('click', () =>{
 
 })
 window.addEventListener("keydown", (event) => {
-  if (event.key == 'a') {
+  if (event.key == 'a' || event.key == 'A' || event.key == 'ArrowLeft') {
     player.isMoving = true;
     player.isMovingLeft = true;
     vxl = -player.speed;
-  } else if (event.key == 'w'){
+  } else if (event.key == 'w' || event.key == 'W' || event.key == 'ArrowUp'){
     player.isMoving = true;
     player.isMovingUp = true;
     vy = -player.speed;
-  } else if (event.key == 'd') {
+  } else if (event.key == 'd' || event.key == 'D' || event.key == 'ArrowRight') {
     player.isMoving = true;
     player.isMovingRight = true;
     vxr = player.speed;
-  } else if (event.key == 's') {
+  } else if (event.key == 's' || event.key == 'S' || event.key == 'ArrowDown') {
     player.isMoving = true;
     player.isMovingDown = true;
     vy = player.speed;
@@ -545,16 +546,16 @@ window.addEventListener("keydown", (event) => {
   }
 )
 window.addEventListener("keyup", (event) => {
-  if (event.key == 'a') {
+  if (event.key == 'a' || event.key == 'A' || event.key == 'ArrowLeft') {
     vxl = 0;
     player.isMovingLeft = false;
-  } else if (event.key == 'w'){
+  } else if (event.key == 'w' || event.key == 'W' || event.key == 'ArrowUp'){
     vy = 0;
     player.isMovingUp = false;
-  } else if (event.key == 'd') {
+  } else if (event.key == 'd' || event.key == 'D' || event.key == 'ArrowRight') {
     player.isMovingRight = false;
     vxr = 0;
-  } else if (event.key == 's') {
+  } else if (event.key == 's' || event.key == 'S' || event.key == 'ArrowDown') {
     player.isMovingDown = false;
     vy = 0;
   } 
