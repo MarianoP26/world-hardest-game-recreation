@@ -9,7 +9,7 @@ const startGameBtn = document.querySelector('#startGameBtn');
 const modalEl = document.querySelector('#modalEl');
 const statsEl = document.querySelector('#statsEl');
 const levelEl = document.querySelector('#levelEl');
-const bigScoreEl = document.querySelector('#bigScoreEl');
+const coinsEl = document.querySelector('#coinsEl');
 //-------------------------------------------------------------------------------
 //-----------------------------Global variables----------------------------------
 //Main game loop related vars
@@ -27,7 +27,7 @@ let tileWidth;
 let tileHeight;
 let currentLevel = 3;
 let currentLevelPixels = [];
-let difficulty = 4  ;
+let difficulty = 4;
 //Player related vars
 let player;
 let playerImg;
@@ -37,6 +37,10 @@ let vy = 0;
 //Enemy related vars
 let enemies = [];
 let enemyBlueImg;
+//Coin related vars
+let coinImg;
+let coins = [];
+let currentCoins = 0;
 //Sound related vars
 let awesomeSound;
 let beginSound;
@@ -96,7 +100,6 @@ class Player {
       this.isMoving = false;
     }
 
-
     this.isColliding();
     if (this.isMoving && !this.isCollidingX) {
       this.x += vxr;
@@ -127,6 +130,9 @@ class Player {
           checkPointSoundMax--;
         }
       }
+      else if (isCyan(level.levelPixels[ftcXi]) || isCyan(level.levelPixels[ftcXi2])){
+        nextLevel();
+      }
     }
     if(this.isMovingLeft) {
       let ftcX = getTileCoord((this.x) + vxl, this.y);
@@ -143,6 +149,9 @@ class Player {
           excellentSound.play();
           checkPointSoundMax--;
         }
+      }
+      else if (isCyan(level.levelPixels[ftcXi]) || isCyan(level.levelPixels[ftcXi2])){
+        nextLevel();
       }
     }
     if(this.isMovingUp) {
@@ -161,6 +170,9 @@ class Player {
           checkPointSoundMax--;
         }
       }
+      else if (isCyan(level.levelPixels[ftcYi]) || isCyan(level.levelPixels[ftcYi2])){
+        nextLevel();
+      }
     }
     if(this.isMovingDown) {
       let ftcY = getTileCoord(this.x, this.y + this.size - 2 + vy);
@@ -177,6 +189,9 @@ class Player {
           excellentSound.play();
           checkPointSoundMax--;
         }
+      }
+      else if (isCyan(level.levelPixels[ftcYi]) || isCyan(level.levelPixels[ftcYi2])){
+        nextLevel();
       }
     }
   }
@@ -197,6 +212,10 @@ class Player {
       this.y = this.checkPoint.y * TILESIZE;
     }
     playMusic();
+    coins.forEach((coin) => {
+      coin.respawn();
+    })
+    currentCoins = 0;
   }
 }
 //--------
@@ -274,8 +293,6 @@ class Enemy {
     }else{
       player.die();
     }
-
-    
   }
 
   update(){
@@ -288,18 +305,59 @@ class Enemy {
   }
 }
 //--------
+class Coin {
+  constructor(x,y,img, id){
+    this.x = x;
+    this.y = y;
+    this.img = img;
+    this.isCollected = false;
+    this.size = 18;
+    this.id = id;
+  }
+
+  draw() {
+    if (this.isCollected) return;
+    c.drawImage(this.img, this.x, this.y);
+  }
+
+  update(){
+    this.isColliding();
+  }
+
+  isColliding() {
+    if (player.x > this.size + this.x || this.x > player.size + player.x || player.y > this.size + this.y || this.y > player.size + player.y){
+      return false;
+    }else{
+      this.isCollected = true;
+      currentCoins++;
+      this.x = 0;
+      this.y = 0;
+    }
+  }
+
+  respawn(){
+    if(this.isCollected) {
+      this.x = (levels[currentLevel].coins[this.id].x * 40) + 11;
+      this.y = (levels[currentLevel].coins[this.id].y * 40) + 11;
+      this.isCollected = false;
+    }
+  }
+}
+//--------
 class Level {
-  constructor(levelPixels, tileWidth, tileHeight){
+  constructor(levelPixels){
     this.levelPixels = levelPixels;
     this.tileSize = TILESIZE;
-    this.tileWidth = tileWidth;
-    this.tileHeight = tileHeight;
+    this.tileWidth = levels[currentLevel].width;
     this.loadEntities();
   }
 
   loadEntities(){
     for (let i = 0; i < levels[currentLevel].enemies; i++) {
       enemies.push(new Enemy(levels[currentLevel].enemySpawn[i].x * TILESIZE, levels[currentLevel].enemySpawn[i].y * TILESIZE, levels[currentLevel].enemySpawn[i].s , enemyBlueImg, i));
+    }
+    for (let i = 0; i < levels[currentLevel].coins.length; i++) {
+      coins.push(new Coin((levels[currentLevel].coins[i].x * 40) + 11, (levels[currentLevel].coins[i].y * 40) + 11, coinImg, i));
     }
   }
 
@@ -358,10 +416,14 @@ function animate () {
 }
 
 function update () {
-  deathsEl.innerHTML = player.deaths;
+  deathsEl.innerHTML = player != null ? player.deaths : 0;
+  coinsEl.innerHTML = `${currentCoins}/${levels[currentLevel].coins.length}`;
   player.update();
   enemies.forEach((enemy => {
     enemy.update();
+  }));
+  coins.forEach((coin => {
+    coin.update();
   }))
 
   colorEffectUpdate();
@@ -371,10 +433,15 @@ function update () {
 function draw() {
   level.draw();
   player.draw();
+
+  coins.forEach((coin => {
+    coin.draw();
+  }))
   
   enemies.forEach((enemy => {
     enemy.draw();
-  }))
+  }));
+
 }
 //-------------------------------------------------------------------------------------
 // -----------------------------------Utils--------------------------------------------
@@ -454,11 +521,12 @@ function loadAll() {
   loadLevel(currentLevel);
   loadPlayer();
   loadEnemies();
+  loadCoins();
   loadSounds();
   loadMusic();
 }
 //loaders
-function loadLevel(level) {
+function loadLevel() {
   Jimp.read(levels[currentLevel].url).then(image => {
     tileWidth = image.bitmap.width;
     tileHeight = image.bitmap.height;
@@ -469,13 +537,43 @@ function loadLevel(level) {
     }
   })
 }
+
+function nextLevel(){
+  currentLevel++;
+  wonderfulSound.play();
+  currentLevelPixels = [];
+  player = null;
+  level = null;
+  enemies = [];
+  coins = [];
+  loadLevel();
+  init();
+}
+
+function previousLevel(){
+  player = null;
+  level = null;
+  currentLevel--;
+  wonderfulSound.play();
+  currentLevelPixels = [];
+
+  enemies = [];
+  coins = [];
+  loadLevel();
+  init();
+}
+
 function loadPlayer() {
   playerImg = new Image();
   playerImg.src = './assets/player/player.png';
 }
 function loadEnemies(){
   enemyBlueImg = new Image();
-  enemyBlueImg.src = './assets/enemies/enemyblue.png'
+  enemyBlueImg.src = './assets/enemies/enemyblue.png';
+}
+function loadCoins() {
+  coinImg = new Image();
+  coinImg.src = './assets/coins/coin.png';
 }
 function loadSounds() {
   awesomeSound = new Audio();
@@ -542,6 +640,13 @@ window.addEventListener("keydown", (event) => {
     player.isMoving = true;
     player.isMovingDown = true;
     vy = player.speed;
+  } else if (event.key == 'm' || event.key == 'M') {
+      level = null;
+      nextLevel();
+  } 
+    else if (event.key == 'n' || event.key == 'N') {
+      level = null;
+      previousLevel();
   } 
   }
 )
@@ -559,8 +664,12 @@ window.addEventListener("keyup", (event) => {
     player.isMovingDown = false;
     vy = 0;
   } 
-
   }
 )
+window.addEventListener("keydown", function(e) {
+  if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
+      e.preventDefault();
+  }
+}, false);
 //Load al images before player clicks start button
 loadAll();

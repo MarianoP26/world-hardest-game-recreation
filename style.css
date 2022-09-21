@@ -164,3 +164,132 @@ canvas {
 	display: flex;
 	justify-content: space-around;
 }
+
+
+
+
+@property --rotate {
+	syntax: "<angle>";
+	initial-value: 132deg;
+	inherits: false;
+}
+
+:root {
+	--card-height: 65vh;
+	--card-width: calc(var(--card-height) / 1.5);
+}
+
+
+
+.card {
+	background: #191c29;
+	width:30em;
+	height: 20em;
+	padding: 3px;
+	position: relative;
+	border-radius: 6px;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	font-size: 1.5em;
+	color: rgb(88 199 250 / 0%);
+	cursor: pointer;
+	font-family: cursive;
+}
+
+.card:hover {
+	color: #80e81f;
+	transition: color 1s;
+}
+.card:hover:before, .card:hover:after {
+	animation: none;
+	opacity: 0;
+}
+
+
+.card::before {
+	content: "";
+	width: 104%;
+	height: 102%;
+	border-radius: 8px;
+	background-image: linear-gradient(
+		var(--rotate)
+		, #8ff152, #86f18e 43%, #07f13c);
+		position: absolute;
+		z-index: -1;
+		top: -1%;
+		left: -2%;
+		animation: spin 2.5s linear infinite;
+}
+
+.card::after {
+	position: absolute;
+	content: "";
+	top: calc(var(--card-height) / 6);
+	left: 0;
+	right: 0;
+	z-index: -1;
+	height: 100%;
+	width: 100%;
+	margin: 0 auto;
+	transform: scale(0.8);
+	filter: blur(calc(var(--card-height) / 6));
+	background-image: linear-gradient(
+		var(--rotate)
+		, #8ff152, #86f18e 43%, #07f13c);
+		opacity: 1;
+	transition: opacity .5s;
+	animation: spin 2.5s linear infinite;
+}
+
+@keyframes spin {
+	0% {
+		--rotate: 0deg;
+	}
+	100% {
+		--rotate: 360deg;
+	}
+}
+
+a {
+	color: #212534;
+	text-decoration: none;
+	font-family: sans-serif;
+	font-weight: bold;
+	margin-top: 2rem;
+}
+
+.ui1 {
+	position:absolute;
+	bottom:0;
+	right:0;
+	width: 100px;
+	height: 96px;	
+	background-image: url(./assets/ui/blue.png);
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+.ui2 {
+	position:absolute;
+	bottom:0;
+	left:0;
+	width: 111px;
+	height: 92px;	
+	background-image: url(./assets/ui/redbox.png);
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+.ui3 {
+	position:absolute;
+	top:40px;
+	right:-50px;
+	width: 150px;
+	height: 153px;	
+	background-image: url(./assets/ui/ui-redbox.png);
+	background-size: contain;
+	background-repeat: no-repeat;
+}
