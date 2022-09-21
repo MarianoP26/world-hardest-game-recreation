@@ -7,7 +7,7 @@ canvas.height = 900;
 const deathsEl = document.querySelector('#deathsEl');
 const startGameBtn = document.querySelector('#startGameBtn');
 const modalEl = document.querySelector('#modalEl');
-const statsEl = document.querySelector('#statsEl');
+const statsEl = document.querySelector('.ui-container');
 const levelEl = document.querySelector('#levelEl');
 const coinsEl = document.querySelector('#coinsEl');
 //-------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ let isFirstTime = true;
 let level;
 let tileWidth;
 let tileHeight;
-let currentLevel = 3;
+let currentLevel = 0;
 let currentLevelPixels = [];
 let difficulty = 4;
 //Player related vars
@@ -34,6 +34,7 @@ let playerImg;
 let vxr = 0;
 let vxl = 0;
 let vy = 0;
+let deaths = 0;
 //Enemy related vars
 let enemies = [];
 let enemyBlueImg;
@@ -62,7 +63,7 @@ const COLOR_WHITE = 'rgba(255,255,255,1)';
 const COLOR_GRAY = 'rgba(192,192,192,1)';
 const COLOR_GREEN = '#76ff03';
 let COLOR_CYAN = '#73e8ff';
-const COLOR_YELLOW = 'rgba(255,255,0,1)';
+const COLOR_YELLOW = '#FFD700';
 const TILESIZE = 40;
 //Color related vars
 let colIndex = 255;
@@ -85,7 +86,7 @@ class Player {
     this.isCollidingX = false;
     this.isCollidingY = false;
     this.size = size;
-    this.deaths = 0;
+    this.deaths = deaths;
     this.checkPoint;
   }
 
@@ -197,6 +198,7 @@ class Player {
   }
 
   die() {
+    deaths++;
     this.deaths++;
     dieSound.play();
     musicList[difficulty -1].pause();
@@ -539,6 +541,7 @@ function loadLevel() {
 }
 
 function nextLevel(){
+  checkPointSoundMax++;
   currentLevel++;
   wonderfulSound.play();
   currentLevelPixels = [];
@@ -551,6 +554,7 @@ function nextLevel(){
 }
 
 function previousLevel(){
+  checkPointSoundMax++;
   player = null;
   level = null;
   currentLevel--;
@@ -598,6 +602,14 @@ function loadMusic() {
   hellmodeMusic.src = './assets/music/hellmode.dat';
   musicList.push(easyMusic, mediumMusic, hardMusic, hellmodeMusic);
 }
+
+function canvasRotate() {
+  document.querySelector('.canvas-container').classList.add("canvas-container-hell");
+  let timer = setTimeout(() => {
+    document.querySelector('.canvas-container').classList.remove("canvas-container-hell");
+  },4000)
+}
+
 //------------------------------Event Listeners----------------------------------
 startGameBtn.addEventListener('click', () =>{
   let difficultyRadioEl = document.querySelector('input[name="difficulty"]:checked').value;
@@ -613,15 +625,18 @@ startGameBtn.addEventListener('click', () =>{
   playMusic();
 
   if (difficulty == 4) document.querySelector('canvas').classList.add("canvashell");
-  if (difficulty == 4) document.querySelector('body').classList.add("hellmode");
+  if (difficulty == 4) document.querySelector('.game-container').classList.add("hellmode");
+  if (difficulty == 4) statsEl.classList.add('.hard-ui-counter');
+
   else if (difficulty == 1) document.querySelector('body').classList.add("easy");
   else if (difficulty == 2) document.querySelector('body').classList.add("medium");
   else if (difficulty == 3) {
-    document.querySelector('body').classList.add("hard");
+    document.querySelector('.main').classList.add("hard");
     document.querySelector('canvas').classList.add("hardzoom");
   }
-  
-
+  if (difficulty == 4) {
+    let hellInterval = setInterval(canvasRotate, 12000);
+  }
 })
 window.addEventListener("keydown", (event) => {
   if (event.key == 'a' || event.key == 'A' || event.key == 'ArrowLeft') {
@@ -671,5 +686,7 @@ window.addEventListener("keydown", function(e) {
       e.preventDefault();
   }
 }, false);
+
+
 //Load al images before player clicks start button
 loadAll();

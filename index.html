@@ -18,7 +18,7 @@
             <div class="difficulty">
                 <div class="input-wrapper">
                     <input type="radio" name="difficulty" id="difficulty-choser" value="1" checked="checked">
-                    <label for="easy">Easy</label>
+                    <label for="easy">"Easy"</label>
                 </div>
                 <div class="input-wrapper">
                     <input type="radio" name="difficulty" id="difficulty-choser" value="2">
@@ -41,17 +41,25 @@
             </div>
         </div>
     </div>
-    <canvas></canvas>
-    <div class="stats" id="statsEl">
-        <div class="card">
-            <div class ="deathsEl text-white text-bg ml-2 mt-1 select-none"><span>Level  </span><span id="levelEl">1</span></div>
-            <div class ="deathsEl text-white text-bg ml-2 mt-1 select-none"><span>Deaths: </span><span id="deathsEl">0</span></div>
-            <div class ="deathsEl text-white text-bg ml-2 mt-1 select-none"><span>Coins: </span><span id="coinsEl">0</span></div>
-            <div class="ui1"></div>
-            <div class="ui2"></div>
-            <div class="ui3"></div>
+    <div class="main">
+        <div class="game-container">
+            <div class="canvas-container">
+                <canvas></canvas>
+            </div>
+            <div class="ui-container">
+                <div class="card">
+                    <div class ="deathsEl text-white text-bg ml-2 mt-1 select-none"><span>Level  </span><span id="levelEl">1</span></div>
+                    <div class ="deathsEl text-white text-bg ml-2 mt-1 select-none"><span>Deaths: </span><span id="deathsEl">0</span></div>
+                    <div class ="deathsEl text-white text-bg ml-2 mt-1 select-none"><span>Coins: </span><span id="coinsEl">0</span></div>
+                    <div class="ui1"></div>
+                    <div class="ui2"></div>
+                    <div class="ui3"></div>
+                </div>
+            </div>
         </div>
     </div>
+    
+    
     <script type="module" src="./levels/levels.js"></script>
     <script src="https://unpkg.com/jimp@0.14.0/browser/lib/jimp.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/gsap.min.js" integrity="sha512-cdV6j5t5o24hkSciVrb8Ki6FveC2SgwGfLE31+ZQRHAeSRxYhAQskLkq3dLm8ZcWe1N3vBOEYmmbhzf7NTtFFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
