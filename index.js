@@ -48,6 +48,7 @@ let beginSound;
 let dieSound;
 let excellentSound;
 let wonderfulSound;
+let coinCatch;
 let checkPointSoundMax = 1;
 //Music related vars
 let easyMusic;
@@ -116,10 +117,10 @@ class Player {
   //TODO: Refactor the code where detects if next pixel is cyan/green.
   isColliding() {
     if(this.isMovingRight) {
-      let ftcX = getTileCoord((this.x - 2 + this.size) + vxr, this.y);
+      let ftcX = getTileCoord((this.x - 2.5 + this.size) + vxr, this.y);
       let ftcXi = getPixelIndex(ftcX);
 
-      let ftcX2 = getTileCoord((this.x - 2 + this.size) + vxr, this.y + this.size - 2);
+      let ftcX2 = getTileCoord((this.x - 2.5 + this.size) + vxr, this.y + this.size - 2.5);
       let ftcXi2 = getPixelIndex(ftcX2);
       if (isBlack(level.levelPixels[ftcXi]) || isBlack(level.levelPixels[ftcXi2])){
         this.isCollidingX = true;
@@ -139,7 +140,7 @@ class Player {
       let ftcX = getTileCoord((this.x) + vxl, this.y);
       let ftcXi = getPixelIndex(ftcX);
 
-      let ftcX2 = getTileCoord((this.x) + vxl, this.y + this.size - 2);
+      let ftcX2 = getTileCoord((this.x) + vxl, this.y + this.size - 2.5);
       let ftcXi2 = getPixelIndex(ftcX2);
       if (isBlack(level.levelPixels[ftcXi]) || isBlack(level.levelPixels[ftcXi2])){
         this.isCollidingX = true;
@@ -159,7 +160,7 @@ class Player {
       let ftcY = getTileCoord(this.x, this.y + vy);
       let ftcYi = getPixelIndex(ftcY);
 
-      let ftcY2 = getTileCoord(this.x + this.size - 2, this.y + vy);
+      let ftcY2 = getTileCoord(this.x + this.size - 2.5, this.y + vy);
       let ftcYi2 = getPixelIndex(ftcY2);
       if (isBlack(level.levelPixels[ftcYi]) || isBlack(level.levelPixels[ftcYi2])){
         this.isCollidingY = true;
@@ -176,10 +177,10 @@ class Player {
       }
     }
     if(this.isMovingDown) {
-      let ftcY = getTileCoord(this.x, this.y + this.size - 2 + vy);
+      let ftcY = getTileCoord(this.x, this.y + this.size - 2.5 + vy);
       let ftcYi = getPixelIndex(ftcY);
 
-      let ftcY2 = getTileCoord(this.x + this.size - 2, this.y + this.size - 2 + vy);
+      let ftcY2 = getTileCoord(this.x + this.size - 2.5, this.y + this.size - 2.5 + vy);
       let ftcYi2 = getPixelIndex(ftcY2);
       if (isBlack(level.levelPixels[ftcYi]) || isBlack(level.levelPixels[ftcYi2])){
         this.isCollidingY = true;
@@ -331,6 +332,7 @@ class Coin {
       return false;
     }else{
       this.isCollected = true;
+      coinCatch.play();
       currentCoins++;
       this.x = 0;
       this.y = 0;
@@ -394,7 +396,7 @@ class Level {
 //-------------------------------- LEVEL INITIALIZATION ----------------------------------------
 function init() {
   level = new Level(currentLevelPixels, tileWidth, tileHeight);
-  let playerSpeed = 2;
+  let playerSpeed = 2.5;
   let playerSize = 30;
   player = new Player(levels[currentLevel].playerSpawn.x * TILESIZE, levels[currentLevel].playerSpawn.y * TILESIZE, playerSpeed, playerSize, playerImg); 
   levelEl.innerHTML = currentLevel + 1;
@@ -541,16 +543,19 @@ function loadLevel() {
 }
 
 function nextLevel(){
-  checkPointSoundMax++;
-  currentLevel++;
-  wonderfulSound.play();
-  currentLevelPixels = [];
-  player = null;
-  level = null;
-  enemies = [];
-  coins = [];
-  loadLevel();
-  init();
+  if (currentCoins == coins.length) {
+    currentCoins = 0;
+    checkPointSoundMax++;
+    currentLevel++;
+    wonderfulSound.play();
+    currentLevelPixels = [];
+    player = null;
+    level = null;
+    enemies = [];
+    coins = [];
+    loadLevel();
+    init();
+  }
 }
 
 function previousLevel(){
@@ -590,6 +595,8 @@ function loadSounds() {
   excellentSound.src = './assets/sounds/excellent.wav';
   wonderfulSound = new Audio();
   wonderfulSound.src = './assets/sounds/wonderful.wav';
+  coinCatch = new Audio();
+  coinCatch.src = './assets/sounds/coinCatch.wav';
 }
 function loadMusic() {
   easyMusic = new Audio();
@@ -656,11 +663,10 @@ window.addEventListener("keydown", (event) => {
     player.isMovingDown = true;
     vy = player.speed;
   } else if (event.key == 'm' || event.key == 'M') {
-      level = null;
+    currentCoins = coins.length;
       nextLevel();
   } 
     else if (event.key == 'n' || event.key == 'N') {
-      level = null;
       previousLevel();
   } 
   }
