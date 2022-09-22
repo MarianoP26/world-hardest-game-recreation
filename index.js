@@ -1,4 +1,5 @@
 import levels from './levels/levels.js';
+import facts from './assets/utils/facts.js';
 //-------------------------------DOM Things--------------------------------------
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
@@ -10,6 +11,8 @@ const modalEl = document.querySelector('#modalEl');
 const statsEl = document.querySelector('.ui-container');
 const levelEl = document.querySelector('#levelEl');
 const coinsEl = document.querySelector('#coinsEl');
+const factsEl = document.querySelector('.fact');
+const dykEl = document.querySelector('.did-you-know');
 //-------------------------------------------------------------------------------
 //-----------------------------Global variables----------------------------------
 //Main game loop related vars
@@ -59,10 +62,14 @@ let musicList = [];
 let musicRepeatCounter = 2;
 let currentSong;
 //Global CONSTs
-const COLOR_BLACK = 'rgba(0,0,0,1)';
 const COLOR_WHITE = 'rgba(255,255,255,1)';
 const COLOR_GRAY = 'rgba(192,192,192,1)';
+const COLOR_WOOD_LIGHT = '#BA8C63';
+const COLOR_WOOD_DARK = '#9E5E00';
+const COLOR_GREEN_DARK = '#0c5d25';
+const COLOR_GREEN_LIGHT = '#8FE07F';
 const COLOR_GREEN = '#76ff03';
+const COLOR_BLACK = 'rgba(0,0,0,1)';
 let COLOR_CYAN = '#73e8ff';
 const COLOR_YELLOW = '#FFD700';
 const TILESIZE = 40;
@@ -353,6 +360,8 @@ class Level {
     this.levelPixels = levelPixels;
     this.tileSize = TILESIZE;
     this.tileWidth = levels[currentLevel].width;
+    this.currentColors = {};
+    this.setCurrentColors();
     this.loadEntities();
   }
 
@@ -365,6 +374,19 @@ class Level {
     }
   }
 
+  setCurrentColors() {
+    if (currentLevel == 2 || currentLevel == 4) {
+      this.currentColors = {a: COLOR_WOOD_LIGHT, b: COLOR_WOOD_DARK};
+    }
+    else if (currentLevel == 1 || currentLevel == 3) {
+      this.currentColors = {a: COLOR_GREEN_LIGHT, b:COLOR_GREEN_DARK};
+    }
+
+    else {
+      this.currentColors = {a:COLOR_WHITE, b:COLOR_GRAY};
+    }
+  }
+
   draw(){
     let yOffset = 0;
     let xOffset = 0;
@@ -372,8 +394,8 @@ class Level {
     let x = 0;
     for (let i = 0; i < this.levelPixels.length; i++) {
       if(isBlack(this.levelPixels[i])) color = COLOR_BLACK;
-      else if(isWhite(this.levelPixels[i])) color = COLOR_WHITE;
-      else if(isGray(this.levelPixels[i])) color = COLOR_GRAY;
+      else if(isWhite(this.levelPixels[i])) color = this.currentColors.a;
+      else if(isGray(this.levelPixels[i])) color = this.currentColors.b;
       else if(isGreen(this.levelPixels[i])) color = COLOR_GREEN;
       else if(isCyan(this.levelPixels[i])) color = COLOR_CYAN;
       else if(isYellow(this.levelPixels[i])) color = COLOR_YELLOW;
@@ -644,6 +666,7 @@ startGameBtn.addEventListener('click', () =>{
   if (difficulty == 4) {
     let hellInterval = setInterval(canvasRotate, 12000);
   }
+  let dykInterval = setInterval(dykRotate,30000);
 })
 window.addEventListener("keydown", (event) => {
   if (event.key == 'a' || event.key == 'A' || event.key == 'ArrowLeft') {
@@ -693,6 +716,11 @@ window.addEventListener("keydown", function(e) {
   }
 }, false);
 
+function dykRotate() {
+  let randomNumber = Math.floor(Math.random() * ((facts.length - 1) - 0 + 1) + 0);
+  factsEl.innerText = facts[randomNumber];
+  dykEl.style.visibility = 'visible';
+}
 
 //Load al images before player clicks start button
 loadAll();

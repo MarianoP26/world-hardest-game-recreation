@@ -192,6 +192,32 @@ body{
 .ui-container {
 	visibility: hidden;
 	margin-top: 5rem;
+	display: flex;
+	flex-direction: column;
+	/* justify-content: center; */
+	align-items: center;
+}
+
+.did-you-know {
+	margin-top: 50px;
+	visibility: hidden;
+	animation: 1s ease-in-out;
+}
+
+/* .dyk-container {
+	visibility: hidden;
+} */
+
+h2 {
+	font-size: 27px;
+	color: crimson;
+	font-weight: 900;
+}
+
+p {
+	font-size: 17px;
+	color: black;
+	font-weight: 600;
 }
 
 .deathsEl {
