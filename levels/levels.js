@@ -73,5 +73,16 @@ export default [{
   coins: [],
   width: 11,
 },
+{
+  id: 8,
+  url: './assets/levels/level8.png',
+  playerSpawn: {x:17,y:2},
+  checkpoints: [{x:4,y:5}],
+  enemies: 5,
+  enemySpawn: [{x:8,y:2,s:9},{x:16,y:7,s:2},{x:11,y:6,s:2},{x:3,y:7,s:2},{x:1,y:3,s:2}],
+  enemyPath: [[{x:8,y:2,s:9}],[{x:16,y:7,s:2}],[{x:11,y:6,s:2}],[{x:3,y:7,s:2}],[{x:1,y:3,s:2}]],
+  coins: [{x:1,y:1},{x:2,y:1}],
+  width: 20,
+},
 
 ];
